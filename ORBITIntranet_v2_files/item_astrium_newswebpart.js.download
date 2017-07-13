@@ -1,0 +1,86 @@
+/* This file is currently associated to an HTML file of the same name and is drawing content from it.  Until the files are disassociated, you will not be able to move, delete, rename, or make any other changes to this file. */
+
+function DisplayTemplate_4a045ce7fa454b7ba0b022be61656435(ctx) {
+  var ms_outHtml=[];
+  var cachePreviousTemplateData = ctx['DisplayTemplateData'];
+  ctx['DisplayTemplateData'] = new Object();
+  DisplayTemplate_4a045ce7fa454b7ba0b022be61656435.DisplayTemplateData = ctx['DisplayTemplateData'];
+
+  ctx['DisplayTemplateData']['TemplateUrl']='~sitecollection\u002f_catalogs\u002fmasterpage\u002fDisplay Templates\u002fContent Web Parts\u002fItem_Astrium_NewsWebpart.js';
+  ctx['DisplayTemplateData']['TemplateType']='Item';
+  ctx['DisplayTemplateData']['TargetControlType']=['Content Web Parts'];
+  this.DisplayTemplateData = ctx['DisplayTemplateData'];
+
+  ctx['DisplayTemplateData']['ManagedPropertyMapping']={'ListItemID':null, 'Title':['Title'], 'Path':['Path'], 'ArticleDate':[]};
+  var cachePreviousItemValuesFunction = ctx['ItemValues'];
+  ctx['ItemValues'] = function(slotOrPropName) {
+    return Srch.ValueInfo.getCachedCtxItemValue(ctx, slotOrPropName)
+};
+
+ms_outHtml.push('',''
+,''
+);
+            if(!$isNull(ctx.CurrentItem) && !$isNull(ctx.ClientControl)) {
+                var title = $getItemValue(ctx, "Title");
+                var path = $getItemValue(ctx, "Path");
+                var articledate = $getItemValue(ctx, "ArticleDate");
+                var scUrl = (_spPageContextInfo.siteServerRelativeUrl == "/") ? "" : _spPageContextInfo.siteServerRelativeUrl;
+                var url = String.format("{0}/newsroom/pages/newsitem.aspx?id={1}", scUrl, ctx.CurrentItem.ListItemID);
+
+                articledate.toString = function() {
+                    var monthNames = [ $resource("lblJanuary"), $resource("lblFebruary"), $resource("lblMarch"), $resource("lblApril"),
+                                        $resource("lblMay"), $resource("lblJune"), $resource("lblJuly"), $resource("lblAugust"),
+                                        $resource("lblSeptember"), $resource("lblOctober"), $resource("lblNovember"), $resource("lblDecember") ];
+
+                    var date = new Date(this.inputValue);
+                    var d = date.getDate().toString();
+                    var m = date.getMonth();
+                    var y = date.getFullYear().toString();
+
+                    d = d.length == 1 ? '0' + d : d;
+
+                    return monthNames[m] + ' ' + d + ' ' + y;
+                }
+        ms_outHtml.push(''
+,'        <li>'
+);
+                    if(!articledate.isEmpty)
+                    {
+            ms_outHtml.push(''
+,'            <time class="date">'
+,'                ', articledate.toString() ,''
+,'            </time>'
+);
+                     }
+            ms_outHtml.push(''
+,'            <a href="', url ,'">'
+,'                ', title ,''
+,'            </a>'
+,'        </li>'
+);
+            }
+        ms_outHtml.push(''
+,'    '
+);
+
+  ctx['ItemValues'] = cachePreviousItemValuesFunction;
+  ctx['DisplayTemplateData'] = cachePreviousTemplateData;
+  return ms_outHtml.join('');
+}
+function RegisterTemplate_4a045ce7fa454b7ba0b022be61656435() {
+
+if ("undefined" != typeof (Srch) &&"undefined" != typeof (Srch.U) &&typeof(Srch.U.registerRenderTemplateByName) == "function") {
+  Srch.U.registerRenderTemplateByName("Item_Astrium_NewsWebpart", DisplayTemplate_4a045ce7fa454b7ba0b022be61656435);
+}
+
+if ("undefined" != typeof (Srch) &&"undefined" != typeof (Srch.U) &&typeof(Srch.U.registerRenderTemplateByName) == "function") {
+  Srch.U.registerRenderTemplateByName("~sitecollection\u002f_catalogs\u002fmasterpage\u002fDisplay Templates\u002fContent Web Parts\u002fItem_Astrium_NewsWebpart.js", DisplayTemplate_4a045ce7fa454b7ba0b022be61656435);
+}
+//
+        $includeLanguageScript("~sitecollection\u002f_catalogs\u002fmasterpage\u002fDisplay Templates\u002fContent Web Parts\u002fItem_Astrium_NewsWebpart.js", "~sitecollection/_catalogs/masterpage/Display Templates/Language Files/{Locale}/ResourcesAstriumCatalog.js");
+    //
+}
+RegisterTemplate_4a045ce7fa454b7ba0b022be61656435();
+if (typeof(RegisterModuleInit) == "function" && typeof(Srch.U.replaceUrlTokens) == "function") {
+  RegisterModuleInit(Srch.U.replaceUrlTokens("~sitecollection\u002f_catalogs\u002fmasterpage\u002fDisplay Templates\u002fContent Web Parts\u002fItem_Astrium_NewsWebpart.js"), RegisterTemplate_4a045ce7fa454b7ba0b022be61656435);
+}

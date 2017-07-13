@@ -1,0 +1,402 @@
+
+var Marlink = window.Marlink || {};
+
+(function (ns, undefined) {
+    ns.Orbit = {
+        fixTermStoreManager: function() {
+            console.log('Marlink.Orbit.fixTermStoreManager()');
+            $("#contentRow").css("width", "1180px");
+        },
+
+        showFooterStatic: function () {
+            console.log('Marlink.Orbit.showFooterStatic()');
+            var footer = "<footer class='ms-dialogHidden'>" +
+                         "  <div class='navigation'>" +
+                         "    <ul>" +
+                         "      <li><a href='/'>Home</a></li>" +
+                         "      <li><a href='mailto:orbit@marlink.com'>Contact webmaster</a></li>" +
+                         "      <li>All rights reserved &copy; Marlink 2016</li>" +
+                         "    </ul>" +
+                         "  </div>" +
+                         "</footer>";
+
+            $(".ms-core-overlay").append(footer);
+        },
+
+        showFooter: function () {
+            console.log('Marlink.Orbit.showFooter()');
+            var footerFile = _spPageContextInfo.siteAbsoluteUrl + "/style library/styling/scripts/footer.txt";
+            var footer = $("<footer>").addClass("ms-dialogHidden").appendTo(".ms-core-overlay");
+            var navigation = $("<div>").addClass("navigation").appendTo(footer);
+            var list = $("<ul>").appendTo(navigation);
+
+            $.getJSON(footerFile, function (data) {
+                console.log("> Loaded footer items.")
+                $.each(data.FooterItems, function (ix, value) {
+                    var item = $("<li>");
+                    if (value.Url === "") {
+                        item.html(value.Label)
+                    } else {
+                        item.append($("<a>").attr("href", value.Url).html(value.Label))
+                    }
+                    item.appendTo(list);
+                });
+            });
+        },
+
+        updateSiteLogoLink: function () {
+            console.log('Marlink.Orbit.updateSiteLogoLink()');
+
+            var oldLogoId = $("#DeltaSiteLogo > a").attr('id');
+            $("#" + oldLogoId).attr('id', 'OrbitSiteLogo');
+            $("#DeltaSiteLogo > a").after("<a id='" + oldLogoId + "' href='#' style='display:none'>Dummy</a>");
+            $("#OrbitSiteLogo").attr('href', _spPageContextInfo.siteAbsoluteUrl);
+            $("#OrbitSiteLogo > a").attr("title", "Home");
+            $("#OrbitSiteLogo > a > img").attr("alt", "Home");
+        },
+
+        hideQuickLaunch: function () {
+            console.log('Marlink.Orbit.hideQuickLaunch()');
+            if (window.location.pathname.indexOf("/_layouts/") !== 0) { // Not a Layouts page
+                document.getElementById("sideNavBox").setAttribute("style", "display:none;")
+                document.getElementById("contentBox").setAttribute("style", "margin-left:5px;")
+            }
+        },
+
+        applyHomepageStyling: function () {
+            console.log('Marlink.Orbit.applyHomepageStyling()');
+            var cssUrl = "/style library/styling/css/orbit-homepage.css";
+            if (_spPageContextInfo.siteServerRelativeUrl != "/") {
+                cssUrl = _spPageContextInfo.siteServerRelativeUrl + cssUrl
+            }
+
+            var css = document.createElement('link');
+            css.rel = 'stylesheet';
+            css.type = 'text/css';
+            css.href = cssUrl;
+
+            document.getElementsByTagName('head')[0].appendChild(css);
+            ns.Orbit.hideQuickLaunch();
+        },
+
+        showBreadCrumb: function () {
+            var breadCrumbItems = [];
+            var ctx;
+            var web;
+            var parentInfo;
+
+            SP.SOD.executeFunc('sp.js', 'SP.ClientContext', loadBreadCrumbInfo);
+
+            function loadBreadCrumbInfo() {
+                console.log('loadBreadCrumbInfo()');
+                ctx = SP.ClientContext.get_current();
+
+                addTaxonomyItemsToBreadCrumb()
+                    .then(addWebItemsToBreadCrumb, errorHandler);
+            }
+
+            function addTaxonomyItemsToBreadCrumb() {
+                console.log('addTaxonomyItemsToBreadCrumb()');
+                var deferred = $.Deferred();
+
+                if (typeof _spFriendlyUrlPageContextInfo !== "undefined") {
+                    console.log('..Processing friendly url');
+                    deferred = loadTaxonomyScripts()
+                                .then(getCurrentTermSet, loadTaxonomyError)
+                                .then(getCurrentNavigationTerm, loadTaxonomyError);
+                } else {
+                    console.log('..No friendly url to process');
+                    deferred.resolve();
+                }
+
+                return deferred.promise();
+            }
+
+            function addWebItemsToBreadCrumb() {
+                console.log('addWebItemsToBreadCrumb()');
+                web = ctx.get_web();
+                parentInfo = web.get_parentWeb();
+
+                ctx.load(web, "Title", "ServerRelativeUrl");
+                ctx.load(parentInfo, "Id");
+
+                ctx.executeQueryAsync(
+                    Function.createDelegate(this, loadWebInfo),
+                    Function.createDelegate(this, loadWebError)
+                    );
+            }
+
+            function loadTaxonomyScripts() {
+                console.log('loadTaxonomyScripts()');
+                var deferred = $.Deferred();
+
+                SP.SOD.registerSod('sp.taxonomy.js', SP.Utilities.Utility.getLayoutsPageUrl('sp.taxonomy.js'));
+                SP.SOD.registerSod('sp.publishing.js', SP.Utilities.Utility.getLayoutsPageUrl('sp.publishing.js'));
+
+                SP.SOD.executeFunc('sp.taxonomy.js', 'SP.Taxonomy.TaxonomySession', function () {
+                    SP.SOD.executeFunc('sp.publishing.js', 'SP.Publishing.Navigation.NavigationTermSet', function () {
+                        var taxonomySession = new SP.Taxonomy.TaxonomySession.getTaxonomySession(ctx);
+                        deferred.resolve(taxonomySession);
+                    });
+                });
+
+                return deferred.promise();
+            }
+
+            function getCurrentTermSet(taxonomySession) {
+                console.log('getCurrentTermSet()');
+                var deferred = $.Deferred();
+
+                var termStores = taxonomySession.get_termStores();
+
+                ctx.load(termStores, "Include(Id)");
+                ctx.executeQueryAsync(function () {
+                    var termStore;
+                    var termSet;
+                    var termStoresEnumerator = termStores.getEnumerator();
+
+                    while (termStoresEnumerator.moveNext()) {
+                        var currentTermStore = termStoresEnumerator.get_current();
+                        if (currentTermStore.get_id().toString() === _spFriendlyUrlPageContextInfo.termStoreId) {
+                            termStore = currentTermStore;
+                        }
+                    }
+
+                    if (termStore) {
+                        termSet = termStore.getTermSet(_spFriendlyUrlPageContextInfo.termSetId);
+                        if (!termSet) {
+                            console.log('..TermSet not found!');
+                        }
+                    } else {
+                        console.log('..TermStore not found!');
+                    }
+
+                    deferred.resolve(termSet);
+                }, function (sender, args) {
+                    console.log('An error occurred:');
+                    console.log(args.get_message());
+                    console.log(args.get_stackTrace());
+                    deferred.reject(sender, args);
+                });
+
+                return deferred.promise();
+            }
+
+            function getCurrentNavigationTerm(termSet) {
+                console.log('getCurrentNavigationTerm()');
+                var deferred = $.Deferred();
+
+                var navTermSet = SP.Publishing.Navigation.NavigationTermSet.getAsResolvedByWeb(ctx, termSet, ctx.get_web(), "GlobalNavigationTaxonomyProvider");
+                if (navTermSet) {
+
+                    var navTerms = navTermSet.getAllTerms();
+
+                    ctx.load(navTerms, "Include(Id, Title, TaxonomyName, FriendlyUrlSegment, Parent)");
+                    ctx.executeQueryAsync(function () {
+
+                        var navTermsEnumarator = navTerms.getEnumerator();
+                        var allTerms = [];
+                        var parentId;
+
+                        while (navTermsEnumarator.moveNext()) {
+                            var currentNavTerm = navTermsEnumarator.get_current();
+                            var hasParent = !currentNavTerm.get_parent().get_serverObjectIsNull();
+                            var t = {
+                                Id: currentNavTerm.get_id().toString(),
+                                Title: currentNavTerm.get_title().get_value(),
+                                UrlSegment: currentNavTerm.get_friendlyUrlSegment().get_value(),
+                                HasParent: hasParent,
+                                ParentId: hasParent ? currentNavTerm.get_parent().get_id().toString() : ""
+                            };
+
+                            allTerms.push(t);
+
+                            if (t.Id === _spFriendlyUrlPageContextInfo.termId) {
+                                breadCrumbItems.push({ Title: t.Title, Url: t.UrlSegment });
+                                parentId = t.ParentId;
+                            }
+                        }
+
+                        while (parentId) {
+                            for (i = 0; i < allTerms.length; i++) {
+                                if (allTerms[i].Id === parentId) {
+                                    breadCrumbItems.push({ Title: allTerms[i].Title, Url: allTerms[i].UrlSegment });
+                                    parentId = allTerms[i].ParentId;
+                                    break;
+                                }
+                            }
+                        }
+
+                        deferred.resolve();
+                    }, function (sender, args) {
+                        console.log('An error occurred:');
+                        console.log(args.get_message());
+                        console.log(args.get_stackTrace());
+                        deferred.reject(sender, args);
+                    });
+                } else {
+                    console.log('Navigation termset not found!');
+                }
+
+                return deferred.promise();
+            }
+
+            function loadWebInfo(sender, args) {
+                console.log('loadWebInfo()');
+
+                var url = web.get_serverRelativeUrl();
+                var urlPart;
+
+                if (url == _spPageContextInfo.siteServerRelativeUrl) {
+                    urlPart = ""
+                } else {
+                    urlPart = url.substr(url.lastIndexOf("/") + 1);
+                }
+
+                breadCrumbItems.push({ Title: web.get_title(), Url: urlPart });
+
+                if (!parentInfo.get_serverObjectIsNull()) {
+                    web = ctx.get_site().openWebById(parentInfo.get_id());
+                    parentInfo = web.get_parentWeb();
+
+                    ctx.load(web, "Title", "ServerRelativeUrl");
+                    ctx.load(parentInfo, "Id");
+
+                    ctx.executeQueryAsync(
+                        Function.createDelegate(this, loadWebInfo),
+                        Function.createDelegate(this, loadWebError));
+
+                } else {
+                    console.log('No more parent webs. Start creating breadcrumb');
+                    createBreadCrumb();
+                }
+            }
+
+            function createBreadCrumb() {
+                console.log('createBreadCrumb()');
+                var container = $("<div>").addClass("breadcrumb").addClass("ms-dialogHidden").prependTo("#contentBox");
+                var list = $("<ul>").appendTo(container);
+                var url = "/";
+                if (_spPageContextInfo.siteServerRelativeUrl != "/") {
+                    url = _spPageContextInfo.siteServerRelativeUrl + url
+                }
+                for (var i = breadCrumbItems.length - 1; i >= 0; --i) {
+                    if (breadCrumbItems[i].Url !== "") {
+                        url += breadCrumbItems[i].Url + "/";
+                    }
+                    $("<li>").append($("<a>").attr("href", url).text(breadCrumbItems[i].Title)).appendTo(list);
+                }
+            }
+
+            function errorHandler(sender, args) {
+                console.log('An error occurred loading breadcrumb:');
+                console.log(args.get_message());
+                console.log(args.get_stackTrace());
+            }
+
+            function loadTaxonomyError(sender, args) {
+                console.log('An error occurred loading taxonomy info:');
+                console.log(args.get_message());
+                console.log(args.get_stackTrace());
+            }
+
+            function loadWebError(sender, args) {
+                console.log('An error occurred loading web info:');
+                console.log(args.get_message());
+                console.log(args.get_stackTrace());
+            }
+        },
+
+        load: function () {
+            console.log('Marlink.Orbit.load()');
+            _spBodyOnLoadFunctionNames.push("Marlink.Orbit.init");
+        },
+
+        init: function () {
+            console.log('Marlink.Orbit.Init()');
+            $(function () {
+                ns.Orbit.updateSiteLogoLink();
+                ns.Orbit.showBreadCrumb();
+                if (window.location.pathname.indexOf("_layouts/15/termstoremanager.aspx") !== -1) {
+                    ns.Orbit.fixTermStoreManager();
+                }
+                ns.Orbit.showFooter();
+            });
+        }
+    }
+
+    ns.Tabs = {
+
+        tabClass: "weblet",
+        activeTabClass: "active",
+
+        hideAll: function () {
+            console.log("Marlink.Tabs.hideAll");
+            $("ul." + ns.Tabs.tabClass + " > li > a").each(function (el) {
+                $(this).parent("li").removeClass(ns.Tabs.activeTabClass);
+                $($(this).attr("href")).hide();
+            });
+        },
+
+        showTab: function (el) {
+            console.log("Marlink.Tabs.showTab");
+            $(el).parent("li").addClass(ns.Tabs.activeTabClass);
+            $($(el).attr("href")).show();
+        },
+
+        init: function () {
+            console.log("Marlink.Tabs.init");
+
+            ns.Tabs.hideAll();
+
+            var params = (function (str) {
+                return (str || document.location.search).replace(/(^\?)/, '').split("&").map(function (n) { return n = n.split("="), this[n[0]] = n[1], this }.bind({}))[0];
+            })();
+
+            var el = null;
+            if (params && params.tab) {
+                el = $("ul." + ns.Tabs.tabClass + " > li > a[href*='" + params.tab + "']");
+                if (el.length !== 1) {
+                    el = $("ul." + ns.Tabs.tabClass + " > li:first > a");
+                }
+            } else {
+                el = $("ul." + ns.Tabs.tabClass + " > li:first > a");
+            }
+            ns.Tabs.showTab(el);
+
+            $("ul." + ns.Tabs.tabClass + " > li > a").click(function (event) {
+                ns.Tabs.hideAll();
+                ns.Tabs.showTab(this);
+                return false;
+            });
+        }
+    }
+
+})(Marlink);
+
+
+if (window.location.pathname.toLowerCase().endsWith("/sitemanager.aspx") == false) {
+    console.log("Loading jQuery");
+
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+
+    if (script.readyState) {  //IE
+        script.onreadystatechange = function () {
+            if (script.readyState == "loaded" ||
+                    script.readyState == "complete") {
+                console.log("jQuery loaded");
+                script.onreadystatechange = null;
+                Marlink.Orbit.load();
+            }
+        };
+    } else {  //Others
+        script.onload = function () {
+            console.log("jQuery loaded");
+            Marlink.Orbit.load();
+        };
+    }
+
+    script.src = '/sites/orbit/style%20library/styling/scripts/jquery-2.2.1.min.js';
+    document.getElementsByTagName('head')[0].appendChild(script);
+}

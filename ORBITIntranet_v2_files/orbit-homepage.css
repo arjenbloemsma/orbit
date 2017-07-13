@@ -1,0 +1,47 @@
+.welcome-content {
+    display: none;
+}
+.tableCol-75 .tableCol-33 {
+    width: 294px;
+}
+.ms-table.ms-fullWidth > .tableCol-33 > .ms-webpart-zone.ms-fullWidth > div.s4-wpcell-plain:first-child {
+    height: 345px;
+}
+.ms-table.ms-fullWidth > .tableCol-33:nth-child(1) {
+    padding: 0 11px 0 0 !important;
+}
+.ms-table.ms-fullWidth > .tableCol-33:nth-child(2) {
+    padding: 0 11px !important;
+}
+.ms-table.ms-fullWidth > .tableCol-33:nth-child(3) {
+    padding: 0 0 0 11px !important;
+}
+
+    .ms-table.ms-fullWidth > .tableCol-33:nth-child(3) > .ms-webpart-zone.ms-fullWidth > div.s4-wpcell-plain:nth-child(1) {
+        height: 225px;
+    }
+    .ms-table.ms-fullWidth > .tableCol-33:nth-child(3) > .ms-webpart-zone.ms-fullWidth > div:nth-child(2) {
+        height: 100px;
+    }
+
+.tableCol-33 #SearchBox > .ms-srch-sbLarge > .ms-srch-sbLarge-fullWidth {
+    width: 250px;
+}
+
+#contentRow #contentBox .breadcrumb {
+    display:none;
+}
+
+
+h2.ms-webpart-titleText {
+    border-bottom: solid 3px #81817f !important;
+    margin: 0 0 18px 0;
+    padding: 0 0 3px 0;
+    color: #333 !important;
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: uppercase;
+}
+    h2.ms-webpart-titleText a {
+        color: #333 !important;
+    }
