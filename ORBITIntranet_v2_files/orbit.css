@@ -195,6 +195,30 @@ footer {
         padding: 50px 0;
         background: url('./footer-background.png') no-repeat top left #ef4c24;
     }
+        #footer #top-footer #social-footer #menu-social-footer li a {
+            display: block;
+            width: 30px;
+            height: 30px;
+            margin-right: 25px;
+            line-height: 28px;
+            border: 1px solid #fff;
+            font-size: 15px;
+            font-size: .9375rem;
+            -moz-border-radius: 15px;
+            -webkit-border-radius: 15px;
+            border-radius: 15px;
+            color: #fff;
+            text-align: center;
+        }
+            .fa {
+                display: inline-block;
+                font: normal normal normal 14px/1 FontAwesome;
+                font-size: inherit;
+                text-rendering: auto;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+            
     footer .navigation {
         margin: 0 auto;
         padding: 28px 0;
