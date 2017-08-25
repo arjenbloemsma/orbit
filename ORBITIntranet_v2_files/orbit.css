@@ -191,11 +191,27 @@ footer {
     font-size: 100%;
     vertical-align: baseline;
 }
-    #footer #top-footer {
+    footer ol, ul {
+        list-style: none;
+    }
+
+    footer .wrapper {
+        max-width: 1000px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    footer #top-footer {
         padding: 50px 0;
         background: url('./footer-background.png') no-repeat top left #ef4c24;
     }
-        #footer #top-footer #social-footer #menu-social-footer li a {
+
+    footer #top-footer #social-footer {
+        clear: both;
+        overflow: hidden;
+        text-align: right;
+    }
+        footer #top-footer #social-footer #menu-social-footer li a {
             display: block;
             width: 30px;
             height: 30px;
