@@ -302,8 +302,8 @@ footer {
 /* Topnavigation */
 .ms-core-listMenu-horizontalBox {
     float: right;
-    color: #9e9e9e;
-    font-size: 11px;
+    color: #404042;
+    font-size: 1.0625rem;
     text-transform: uppercase;
     margin-top: 37px;
 }
@@ -337,24 +337,17 @@ footer {
     }
 
         .ms-core-listMenu-horizontalBox ul.dynamic li {
-            padding-top: 3px;
-            padding-bottom: 3px;
-            padding-left: 0;
+            padding: 37px 0 41px;
             list-style-type: none;
             border-bottom: 1px solid rgb(44,44,44);
             margin-left: 14px;
         }
-
             .ms-core-listMenu-horizontalBox ul.dynamic li:last-child {
                 border-bottom: none;
             }
 
-            .ms-core-listMenu-horizontalBox ul.dynamic li > a .menu-item-text {
-                color: #9e9e9e !important;
-            }
-
             .ms-core-listMenu-horizontalBox ul.dynamic li:hover > a .menu-item-text {
-                color: #ffffff !important;
+                color: #ef4c24;
             }
     
     .ms-core-listMenu-horizontalBox li.dynamic > ul.dynamic {
