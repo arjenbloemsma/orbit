@@ -231,7 +231,12 @@ footer {
             color: #fff;
             text-align: center;
         }
-            #footer #top-footer #social-footer #menu-social-footer li.home-footer a {
+
+            footer #top-footer #social-footer #menu-social-footer li a:hover, #footer #top-footer #social-footer #menu-social-footer li a:focus {
+                color: #9a3218;
+                border-color: #9a3218;
+            }
+            footer #top-footer #social-footer #menu-social-footer li.home-footer a {
                 width: 155px;
                 height: 51px;
                 margin-right: 50px;
